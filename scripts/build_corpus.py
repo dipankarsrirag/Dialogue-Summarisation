@@ -50,7 +50,38 @@ if __name__ == '__main__':
 
     corpus = train.apply(combine_columns, axis=1)
     corpus = list(map(tokenize, corpus))
-    corpus = '\n'.join(corpus)
+    train_corpus = '\n'.join(corpus)
 
-    with open("../data/processed/corpus", "w") as f:
+    with open("../data/processed/train_corpus", "w") as f:
+        f.write(train_corpus)
+    print('Training Corpus Generated')
+    dev = pd.read_json(
+        '../data/raw/dialogsum/dialogsum.dev.jsonl', lines=True)
+    dev['summary'] = dev['summary'].apply(
+        lambda x: '<SOS> ' + x + ' <EOS>')
+
+    dev_corpus = dev.apply(combine_columns, axis=1)
+    dev_corpus = list(map(tokenize, dev_corpus))
+    dev_corpus = '\n'.join(dev_corpus)
+    with open("../data/processed/dev_corpus", "w") as f:
+        f.write(dev_corpus)
+    corpus.append(dev_corpus)
+    print('Dev Corpus Generated')
+
+    test = pd.read_json(
+        '../data/raw/dialogsum/dialogsum.test.jsonl', lines=True)[['dialogue', 'summary1']]
+    test.columns = ['dialogue', 'summary']
+    test['summary'] = test['summary'].apply(
+        lambda x: '<SOS> ' + x + ' <EOS>')
+
+    test_corpus = test.apply(combine_columns, axis=1)
+    test_corpus = list(map(tokenize, test_corpus))
+    test_corpus = '\n'.join(test_corpus)
+    corpus.append(test_corpus)
+    corpus = '\n'.join(corpus)
+    print('Test Corpus Generated')
+
+    with open("../data/processed/glove_corpus", "w") as f:
         f.write(corpus)
+
+    print('GloVe Corpus Generated')
